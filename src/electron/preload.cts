@@ -12,7 +12,7 @@ contextBridge.exposeInMainWorld('electron', {
         });
     },
     getStaticData: () => ipcInvoke('getStaticData'),
-    sendFrameActon: (payload: FrameWindowAction) => ipcSend('sendFrameAction', payload),
+    sendFrameAction: (payload: FrameWindowAction) => ipcSend('sendFrameAction', payload),
 }) satisfies Window['electron'];
 
 function ipcInvoke<Key extends keyof EventPayloadMapping>(key: Key): Promise<EventPayloadMapping[Key]> {

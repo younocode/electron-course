@@ -1,8 +1,11 @@
 import { BrowserWindow, app } from 'electron';
 import path from 'path';
-import { ipcMainHandler, isDev } from './util.js';
+import { ipcMainHandler, ipcMainOn, isDev } from './util.js';
 import { getStaticData, pollResources } from './resourceManager.js';
 import { getPreloadPath } from './pathResolver.js';
+import { createMenu } from './menu.js';
+import { createTray } from './tray.js';
+import { log } from 'console';
 
 app.on('ready', () => {
     const mainWindow = new BrowserWindow({
@@ -21,4 +24,48 @@ app.on('ready', () => {
     ipcMainHandler('getStaticData', () => {
         return getStaticData()
     })
+
+
+    ipcMainOn('sendFrameAction', (payload) => {
+        switch (payload) {
+            case 'CLOSE':
+                mainWindow.close();
+                break;
+            case 'MAXIMIZE':
+                mainWindow.maximize();
+                break;
+            case 'MINIMIZE':
+                mainWindow.minimize();
+                break;
+        }
+    });
+
+    createTray(mainWindow);
+
+
+    handleCloseEvents(mainWindow);
+
+    createMenu(mainWindow);
 })
+
+function handleCloseEvents(mainWindow: BrowserWindow) {
+    let willClose = false
+    mainWindow.on('close', (e) => {
+        if (willClose) {
+            return;
+        }
+        e.preventDefault();
+        mainWindow.hide();
+        if (app.dock) {
+            app.dock.hide();
+        }
+    });
+
+    app.on('before-quit', () => {
+        willClose = true;
+    });
+
+    mainWindow.on('show', () => {
+        willClose = false;
+    });
+}
