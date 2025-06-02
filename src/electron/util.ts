@@ -22,7 +22,6 @@ export function ipcMainOn<Key extends keyof EventPayloadMapping>(
   handler: (payload: EventPayloadMapping[Key]) => void
 ) {
   ipcMain.on(key, (event, payload) => {
-    console.log(`Received IPC event: ${key}`, payload);
     validateEventFrame(event.senderFrame)
     return handler(payload);
   })
